@@ -1,6 +1,9 @@
 package com.example.googlemapapi;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 	private ArrayList<String> campIdList = new ArrayList<>();
 	private ArrayList<String> campMapLatList = new ArrayList<>();
 	private ArrayList<String> campMapLonList = new ArrayList<>();
+	private Button currentLocation;
 
 	private RequestQueue mRequestQueue;
 
@@ -38,8 +42,11 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		myListView = (ListView) findViewById(R.id.campsitesListView);
+		currentLocation = (Button) findViewById(R.id.locationButton);
 		mRequestQueue = Volley.newRequestQueue(this);
 		parseJSON();
+
+
 	}
 
 	private void parseJSON() {
@@ -85,5 +92,10 @@ public class MainActivity extends AppCompatActivity {
 	};
 
 		mRequestQueue.add(request);
+	}
+
+	public void currentLocationListener(View view) {
+		Intent intent = new Intent(MainActivity.this, GoogleMapAcivity.class);
+		startActivity(intent);
 	}
 }

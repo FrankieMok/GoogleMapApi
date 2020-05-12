@@ -3,4 +3,8 @@
     <string name="campRegion">Region:</string>
     <string name="campName">Name:</string>
     <string name="campStatus">Status:</string>
+
+
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyAw_5rZbGwNvKFBe7YDx3HcKqm-uvifGx0</string>
+
 </resources>

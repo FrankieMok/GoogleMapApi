@@ -10,23 +10,27 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="@string/campStatus"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="5dp"
+        android:text="New Zealand campsites query"
         android:textSize="24sp"
         android:textStyle="bold"/>
+
+
+    <Button
+        android:id="@+id/locationButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView"
+        android:text="Current location"
+        android:onClick="currentLocationListener"/>
 
     <ListView
         android:id="@+id/campsitesListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/textView">
+        android:layout_below="@id/locationButton">
 
     </ListView>
-
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/recycler_view"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_below="@id/textView"-->
-<!--        android:background="@android:color/darker_gray" />-->
 
 </RelativeLayout>

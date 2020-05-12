@@ -11,57 +11,56 @@
         android:id="@+id/regionTextView"
         android:layout_width="317dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:layout_toEndOf="@id/regionNameTextView"
         android:hint="@string/campRegion"
-        android:textSize="24sp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/regionNameTextView"
-        android:layout_width="90dp"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="@string/campRegion"
-        android:textSize="24sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/nameTextView"
         android:layout_width="310dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:layout_below="@+id/regionTextView"
         android:layout_toEndOf="@id/nameNameTextView"
         android:hint="@string/campName"
-        android:textSize="24sp" />
+        android:textSize="16sp" />
     <TextView
         android:id="@+id/nameNameTextView"
-        android:layout_width="90dp"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/regionTextView"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="@string/campName"
-        android:textSize="24sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/statusTextView"
         android:layout_width="310dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:layout_below="@+id/nameNameTextView"
         android:layout_toEndOf="@id/nameStatusTextView"
         android:hint="@string/campStatus"
-        android:textSize="24sp" />
+        android:textSize="16sp" />
     <TextView
         android:id="@+id/nameStatusTextView"
-        android:layout_width="90dp"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/nameTextView"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="@string/campStatus"
-        android:textSize="24sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
 </RelativeLayout>
