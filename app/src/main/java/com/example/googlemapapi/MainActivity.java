@@ -95,7 +95,13 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public void currentLocationListener(View view) {
-		Intent intent = new Intent(MainActivity.this, GoogleMapAcivity.class);
+		Intent intent = new Intent(MainActivity.this, GoogleMapActivity.class);
+		intent.putExtra("campId", campIdList);
+		intent.putExtra("campName", campNameList);
+		intent.putExtra("campStatus", campStatusList);
+		intent.putExtra("campRegion", campRegionList);
+		intent.putExtra("campMapLat", campMapLatList);
+		intent.putExtra("campMapLon", campMapLonList);
 		startActivity(intent);
 	}
 }
