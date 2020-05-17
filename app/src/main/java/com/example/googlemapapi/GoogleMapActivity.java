@@ -1,7 +1,11 @@
 package com.example.googlemapapi;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -22,6 +26,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -116,8 +122,8 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 							Location currentLocation = (Location) task.getResult();
 							LatLng cLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 							mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cLocation, Map_ZOOM));
-
-
+							mMap.addMarker(new MarkerOptions().position(cLocation).title("Current Location").
+									icon(mBitmapDescriptor(getApplicationContext(),R.drawable.ic_person_pin_black_24dp)));
 						}else{
 							Log.d(TAG, "onComplete: current location is null");
 							Toast.makeText(GoogleMapActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
@@ -195,12 +201,11 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 		for (int i=0;i<campIdList.size();i++){
 			String nName = campNameList.get(i);
 			LatLng latLng = new LatLng(Float.parseFloat(campMapLatList.get(i)),Float.parseFloat(campMapLonList.get(i)));
-			mMap.addMarker(new MarkerOptions().position(latLng).title(nName));
-			mMap.animateCamera(CameraUpdateFactory.zoomTo(Map_ZOOM));
-			mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-
+			mMap.addMarker(new MarkerOptions().position(latLng).title(nName).
+					icon(mBitmapDescriptor(getApplicationContext(),R.drawable.ic_home_black_24dp)));
+//			mMap.animateCamera(CameraUpdateFactory.zoomTo(Map_ZOOM));
+//			mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 		}
-
 		if (mLocationPermissionGranted) {
 			getCurrentLocation();
 
@@ -213,5 +218,15 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 
 		}
 	}
+
+		private BitmapDescriptor mBitmapDescriptor (Context context, int id) {
+			Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
+			vectorDrawable.setBounds(0,0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+			Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(),
+					Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(bitmap);
+			vectorDrawable.draw(canvas);
+			return BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
 }
 

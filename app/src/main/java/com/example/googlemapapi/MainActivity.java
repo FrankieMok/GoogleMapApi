@@ -1,10 +1,15 @@
 package com.example.googlemapapi;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,6 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+
+	private static final String TAG = "ListDataActivity";
 
 	private ListView myListView;
 	private ArrayList<String> campRegionList = new ArrayList<>();
@@ -46,6 +53,12 @@ public class MainActivity extends AppCompatActivity {
 		mRequestQueue = Volley.newRequestQueue(this);
 		parseJSON();
 
+		final AlertDialog.Builder customAlert = new AlertDialog.Builder(MainActivity.this);
+		View mView = getLayoutInflater().inflate(R.layout.custom_dialog, null);
+
+		TextView campName = (TextView) mView.findViewById(R.id.TextView_name);
+		TextView campLocation = (TextView) mView.findViewById(R.id.TextView_location);
+		TextView campIntroduction = (TextView) mView.findViewById(R.id.TextView_introduction);
 
 	}
 
@@ -66,11 +79,24 @@ public class MainActivity extends AppCompatActivity {
 								campRegionList.add(jsonobject.getString("region"));
 								campMapLatList.add(jsonobject.getString("lat"));
 								campMapLonList.add(jsonobject.getString("lon"));
-
 							}
 
-							CustomAdapter customAdapter = new CustomAdapter(MainActivity.this, campRegionList, campNameList, campStatusList);
+							CustomAdapter customAdapter = new CustomAdapter(MainActivity.this, campNameList, campRegionList, campStatusList);
 							myListView.setAdapter(customAdapter);
+
+							myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+								@Override
+								public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+									String name = adapterView.getItemAtPosition(position).toString();
+									int pos = adapterView.getPositionForView(view);
+									Log.d(TAG, "onItemClick: You clicked on " + name +", Id: " + pos);
+									String idv = campIdList.get(pos);
+									toastMessage(name + "  " + idv );
+									String urlDetail = "https://api.doc.govt.nz/v2/campsites/"+idv+"/detail";
+
+
+								}
+							});
 
 						} catch (JSONException e) {
 							e.printStackTrace();
@@ -103,5 +129,14 @@ public class MainActivity extends AppCompatActivity {
 		intent.putExtra("campMapLat", campMapLatList);
 		intent.putExtra("campMapLon", campMapLonList);
 		startActivity(intent);
+	}
+
+
+	/**
+	 * customizable toast
+	 * @param message
+	 */
+	private void toastMessage(String message){
+		Toast.makeText(this,message, Toast.LENGTH_SHORT).show();
 	}
 }
