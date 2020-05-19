@@ -1,7 +1,9 @@
 package com.example.googlemapapi;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -42,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
 	private Button currentLocation;
 
 	private RequestQueue mRequestQueue;
+	private Boolean mLocationPermissionGranted = false;
+
+	private static final String fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION;
+	private static final String coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION;
+	private static final int LOCATION_PERMISSION_REQUEST_CODE = 9001;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
 					@Override
 					public void onResponse(JSONArray response) {
 						try {
-
 							for (int i = 0; i < response.length(); i++) {
 								JSONObject jsonobject = response.getJSONObject(i);
 								campIdList.add(jsonobject.getString("assetId"));
@@ -90,10 +98,10 @@ public class MainActivity extends AppCompatActivity {
 									String name = adapterView.getItemAtPosition(position).toString();
 									int pos = adapterView.getPositionForView(view);
 									Log.d(TAG, "onItemClick: You clicked on " + name +", Id: " + pos);
-									String idv = campIdList.get(pos);
-									toastMessage(name + "  " + idv );
-									String urlDetail = "https://api.doc.govt.nz/v2/campsites/"+idv+"/detail";
-
+									String campsiteId = campIdList.get(pos);
+									Intent intent = new Intent(MainActivity.this, CampsiteActivity.class);
+									intent.putExtra("assetId", campsiteId);
+									startActivity(intent);
 
 								}
 							});
@@ -101,13 +109,16 @@ public class MainActivity extends AppCompatActivity {
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
+
 					}
 				}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
+				Log.e(TAG, error.getLocalizedMessage() );
 				error.printStackTrace();
 			}
 		}) {
+			// Create the header information, json and api-key
 		@Override
 		public Map<String, String> getHeaders() {
 			HashMap<String, String> headers = new HashMap<String, String>();
@@ -121,14 +132,10 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public void currentLocationListener(View view) {
-		Intent intent = new Intent(MainActivity.this, GoogleMapActivity.class);
-		intent.putExtra("campId", campIdList);
-		intent.putExtra("campName", campNameList);
-		intent.putExtra("campStatus", campStatusList);
-		intent.putExtra("campRegion", campRegionList);
-		intent.putExtra("campMapLat", campMapLatList);
-		intent.putExtra("campMapLon", campMapLonList);
-		startActivity(intent);
+
+		getLocationPermission();
+
+
 	}
 
 
@@ -139,4 +146,33 @@ public class MainActivity extends AppCompatActivity {
 	private void toastMessage(String message){
 		Toast.makeText(this,message, Toast.LENGTH_SHORT).show();
 	}
+
+	private void getLocationPermission() {
+		Log.d(TAG, "getLocationPermission: get location permissions");
+
+		String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
+				Manifest.permission.ACCESS_COARSE_LOCATION};
+
+		if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+				fineLocationPermission) == PackageManager.PERMISSION_GRANTED) {
+			if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+					coarseLocationPermission) == PackageManager.PERMISSION_GRANTED) {
+				mLocationPermissionGranted = true;
+				Intent intent = new Intent(MainActivity.this, GoogleMapActivity.class);
+				intent.putExtra("campId", campIdList);
+				intent.putExtra("campName", campNameList);
+				intent.putExtra("campStatus", campStatusList);
+				intent.putExtra("campRegion", campRegionList);
+				intent.putExtra("campMapLat", campMapLatList);
+				intent.putExtra("campMapLon", campMapLonList);
+				intent.putExtra("permissionB", mLocationPermissionGranted);
+				startActivity(intent);
+			} else {
+				ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+			}
+		} else {
+			ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+		}
+	}
+
 }

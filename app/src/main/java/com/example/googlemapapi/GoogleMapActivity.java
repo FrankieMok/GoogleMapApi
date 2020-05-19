@@ -2,6 +2,7 @@ package com.example.googlemapapi;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -29,6 +30,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -59,7 +61,7 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 	private FusedLocationProviderClient mFusedLocationProviderClient;
 	private static final float Map_ZOOM = 16f;
 
-	private Boolean mLocationPermissionGranted = false;
+	private Boolean mLocationPermissionGranted;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,26 +71,27 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 		mapFragment = (SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map);
 		mSearchView = (SearchView) findViewById(R.id.searchLocationBar);
+		mLocationPermissionGranted = (Boolean) getIntent().getBooleanExtra("permissionB", false);
+		mapFragment.getMapAsync(GoogleMapActivity.this);
 
-		getLocationPermission();
 
 		mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String query) {
-				String searchlocation = mSearchView.getQuery().toString();
+				String searchLocation = mSearchView.getQuery().toString();
 				List<Address> addressList = null;
 
-				if (searchlocation != null || !searchlocation.equals("")) {
+				if (searchLocation != null || !searchLocation.equals("")) {
 					Geocoder geocoder = new Geocoder(GoogleMapActivity.this);
 					try {
-						addressList = geocoder.getFromLocationName(searchlocation, 1);
+						addressList = geocoder.getFromLocationName(searchLocation, 1);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					if (addressList.size() != 0) {
 						Address address = addressList.get(0);
 						LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-						mMap.addMarker(new MarkerOptions().position(latLng).title(searchlocation));
+						mMap.addMarker(new MarkerOptions().position(latLng).title(searchLocation));
 						mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, Map_ZOOM));
 					} else
 						Toast.makeText(GoogleMapActivity.this, "Unable to get Search!", Toast.LENGTH_SHORT).show();
@@ -136,54 +139,6 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 		}
 	}
 
-
-	private void getLocationPermission() {
-		Log.d(TAG, "getLocationPermission: get location permissions");
-
-		String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
-		Manifest.permission.ACCESS_COARSE_LOCATION};
-
-		if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-				fineLocationPermission) == PackageManager.PERMISSION_GRANTED) {
-			if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-					coarseLocationPermission) == PackageManager.PERMISSION_GRANTED) {
-				mLocationPermissionGranted = true;
-
-				mapFragment.getMapAsync(GoogleMapActivity.this);
-			} else {
-				ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
-			}
-		} else {
-			ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
-			}
-		}
-
-	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-		Log.d(TAG, "onRequestPermissionResult: Started");
-//		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		mLocationPermissionGranted = false;
-
-		switch (requestCode) {
-			case LOCATION_PERMISSION_REQUEST_CODE: {
-				if (grantResults.length > 0) {
-					for (int i = 0; i < grantResults.length; i++) {
-						if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
-						mLocationPermissionGranted = false;
-						Log.d(TAG, "onRequestPermissionResult: Failed!!");
-						return;
-					}
-				}
-				mLocationPermissionGranted = true;
-					Log.d(TAG, "onRequestPermissionResult: Granted.");
-//				SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-//						.findFragmentById(R.id.map);
-				mapFragment.getMapAsync(GoogleMapActivity.this);
-			}
-		}
-		}
-	}
-
 	public void onMapReady(GoogleMap googleMap) {
 		Toast.makeText(this, "GoogleMap is Ready", Toast.LENGTH_SHORT).show();
 		Log.d(TAG, "onMapReady: Google Map is ready");
@@ -206,6 +161,7 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 //			mMap.animateCamera(CameraUpdateFactory.zoomTo(Map_ZOOM));
 //			mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 		}
+
 		if (mLocationPermissionGranted) {
 			getCurrentLocation();
 
@@ -215,8 +171,20 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 				return;
 			}
 			mMap.setMyLocationEnabled(true);
-
 		}
+
+		mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+			@Override
+			public boolean onMarkerClick(Marker marker) {
+				String  campId = marker.getId();
+				String campsiteId = campIdList.get(Integer.parseInt(campId.substring(1)));
+				toastMessage("Receiving information, please wait!" );
+				Intent intent = new Intent(GoogleMapActivity.this, CampsiteActivity.class);
+				intent.putExtra("assetId", campsiteId);
+				startActivity(intent);
+				return false;
+			}
+		});
 	}
 
 		private BitmapDescriptor mBitmapDescriptor (Context context, int id) {
@@ -228,5 +196,13 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 			vectorDrawable.draw(canvas);
 			return BitmapDescriptorFactory.fromBitmap(bitmap);
 		}
+
+	/**
+	 * customizable toast
+	 * @param message
+	 */
+	private void toastMessage(String message){
+		Toast.makeText(this,message, Toast.LENGTH_SHORT).show();
+	}
 }
 
