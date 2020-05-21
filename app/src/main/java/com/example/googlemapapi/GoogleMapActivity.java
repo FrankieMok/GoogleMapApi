@@ -2,6 +2,7 @@ package com.example.googlemapapi;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,8 +11,10 @@ import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -60,6 +64,7 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 	private ArrayList<String> campMapLonList = new ArrayList<>();
 	private LocationRequest mLocationRequest;
 	private LocationCallback mLocationCallback;
+	private LocationManager mLocationManager;
 
 	private static final String fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION;
 	private static final String coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -88,6 +93,7 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 		mapFragment.getMapAsync(GoogleMapActivity.this);
 		mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+		// Simple location search request.
 		mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String query) {
@@ -148,6 +154,8 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 				@Override
 				public void onSuccess(LocationAvailability locationAvailability) {
 					Log.d(TAG, "onSuccess: locationAvailability.isLocationAvailable " + locationAvailability.isLocationAvailable());
+					locationEnabled (); // Check if Location service enable.
+
 					Task<Location> locationTask = mFusedLocationProviderClient.getLastLocation();
 					locationTask.addOnCompleteListener(new OnCompleteListener<Location>() {
 						@Override
@@ -183,6 +191,7 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 		}
 	}
 
+	// Update current location information.
 	private void updateUILocation (Location location) {
 		if (location !=null) {
 			try {
@@ -255,6 +264,7 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 		mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
 	}
 
+	// Update Google map icon.
 	private BitmapDescriptor mBitmapDescriptor (Context context, int id) {
 			Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
 			vectorDrawable.setBounds(0,0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
@@ -272,5 +282,35 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 	private void toastMessage(String message){
 		Toast.makeText(this,message, Toast.LENGTH_SHORT).show();
 	}
+
+	// Check if Location Enabled!
+	private void locationEnabled () {
+		 mLocationManager = (LocationManager) getSystemService(Context. LOCATION_SERVICE ) ;
+		boolean gpsEnabled = false;
+		boolean networkEnabled = false;
+		try {
+			gpsEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+			Log.d(TAG, "GPS enable is "+gpsEnabled);
+		} catch (Exception e) {
+			e.printStackTrace() ;
+		}
+		try {
+			networkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			Log.d(TAG, "Network enable is " + networkEnabled);
+		} catch (Exception e) {
+			e.printStackTrace() ;
+		}
+		if (!gpsEnabled && !networkEnabled) {
+			new AlertDialog.Builder(GoogleMapActivity.this).setMessage("Please Enable The GPS signal!").
+					setPositiveButton( "Open Settings" , new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick (DialogInterface paramDialogInterface , int paramInt)
+								{
+									startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+								}
+							}).setNegativeButton( "Cancel" , null ).show() ;
+		}
+	}
+
 }
 
