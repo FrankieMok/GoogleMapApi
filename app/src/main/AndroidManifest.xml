@@ -17,8 +17,8 @@
      The location accuracy returned by the API is approximately in units of city blocks.  -->
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Specified an older version of the Google Play Services SDK, you must require
-    android.permission.WRITE_EXTERNAL_STORAGE permission.   -->
+    <!-- Specified an older version (targeting version 8.3 or later of the Google Play services SDK)
+    of the Google Play Services SDK , you must require android.permission.WRITE_EXTERNAL_STORAGE permission.   -->
 
     <application
         android:allowBackup="true"

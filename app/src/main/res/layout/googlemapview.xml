@@ -34,5 +34,15 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.85" />
 
+    <ImageView
+        android:id="@+id/myLocationImageView"
+        android:layout_width="36dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/searchLocationBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_my_location_black_24dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

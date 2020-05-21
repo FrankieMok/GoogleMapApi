@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -48,9 +49,13 @@ public class MainActivity extends AppCompatActivity {
 	private RequestQueue mRequestQueue;
 	private Boolean mLocationPermissionGranted = false;
 
+	TextView campName, campLocation, campIntroduction;
+
 	private static final String fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION;
 	private static final String coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION;
 	private static final int LOCATION_PERMISSION_REQUEST_CODE = 9001;
+	private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL = 9002;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +70,11 @@ public class MainActivity extends AppCompatActivity {
 		final AlertDialog.Builder customAlert = new AlertDialog.Builder(MainActivity.this);
 		View mView = getLayoutInflater().inflate(R.layout.custom_dialog, null);
 
-		TextView campName = (TextView) mView.findViewById(R.id.TextView_name);
-		TextView campLocation = (TextView) mView.findViewById(R.id.TextView_location);
-		TextView campIntroduction = (TextView) mView.findViewById(R.id.TextView_introduction);
+		campName = (TextView) mView.findViewById(R.id.TextView_name);
+		campLocation = (TextView) mView.findViewById(R.id.TextView_location);
+		campIntroduction = (TextView) mView.findViewById(R.id.TextView_introduction);
+
+
 
 	}
 
@@ -153,26 +160,30 @@ public class MainActivity extends AppCompatActivity {
 		String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
 				Manifest.permission.ACCESS_COARSE_LOCATION};
 
-		if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-				fineLocationPermission) == PackageManager.PERMISSION_GRANTED) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // M is for Marshmallow, API 23
+			{
 			if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-					coarseLocationPermission) == PackageManager.PERMISSION_GRANTED) {
-				mLocationPermissionGranted = true;
-				Intent intent = new Intent(MainActivity.this, GoogleMapActivity.class);
-				intent.putExtra("campId", campIdList);
-				intent.putExtra("campName", campNameList);
-				intent.putExtra("campStatus", campStatusList);
-				intent.putExtra("campRegion", campRegionList);
-				intent.putExtra("campMapLat", campMapLatList);
-				intent.putExtra("campMapLon", campMapLonList);
-				intent.putExtra("permissionB", mLocationPermissionGranted);
-				startActivity(intent);
+					fineLocationPermission) == PackageManager.PERMISSION_GRANTED) {
+				if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+						coarseLocationPermission) == PackageManager.PERMISSION_GRANTED) {
+					mLocationPermissionGranted = true;
+					Intent intent = new Intent(MainActivity.this, GoogleMapActivity.class);
+					intent.putExtra("campId", campIdList);
+					intent.putExtra("campName", campNameList);
+					intent.putExtra("campStatus", campStatusList);
+					intent.putExtra("campRegion", campRegionList);
+					intent.putExtra("campMapLat", campMapLatList);
+					intent.putExtra("campMapLon", campMapLonList);
+					intent.putExtra("permissionB", mLocationPermissionGranted);
+					startActivity(intent);
+				} else {
+					ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+				}
 			} else {
 				ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
 			}
 		} else {
-			ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+			ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL);
 		}
 	}
-
 }
